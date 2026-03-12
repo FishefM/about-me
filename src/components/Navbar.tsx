@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiDownload } from 'react-icons/fi';
-import cvPdf from '../../public/CV-Yucef-Hernandez.pdf';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +8,8 @@ const Navbar: React.FC = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+
+  const cvPdf = '/CV-Yucef-Hernandez.pdf';
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -44,7 +45,7 @@ const Navbar: React.FC = () => {
 
   const getPath = (path: string) => isHomePage ? path : `/${path}`;
 
-  const handleCVClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleCVClick = () => {
     // No prevenimos el default para que el href del PDF funcione, 
     // pero usamos setTimeout para navegar a la página de CV justo después
     setTimeout(() => {
