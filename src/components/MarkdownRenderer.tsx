@@ -57,6 +57,11 @@ const CALLOUT_TYPES: Record<string, { icon: any, color: string, label: string }>
   cite: { icon: FiMessageSquare, color: 'zinc', label: 'Cita' },
 };
 
+interface CalloutMetadata {
+  type: string;
+  title: any;
+}
+
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes = [] }) => {
   // Función para procesar transclusiones ![[Note Name]] (importar contenido)
   const processTransclusions = (text: string, depth = 0): string => {
@@ -116,8 +121,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
         components={{
           blockquote({ children }: any) {
             // Función recursiva para buscar el marcador de callout en el árbol de nodos
-            const findCalloutMetadata = (nodes: any): any => {
-              let metadata = null;
+            const findCalloutMetadata = (nodes: any): CalloutMetadata | null => {
+              let metadata: CalloutMetadata | null = null;
               React.Children.forEach(nodes, (node: any) => {
                 if (metadata) return;
                 if (node?.type === 'callout-meta') {
