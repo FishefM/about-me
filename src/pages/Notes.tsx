@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FiSearch, FiMenu, FiX, FiFileText, FiChevronRight, FiHome } from 'react-icons/fi';
 import { Link, useSearchParams } from 'react-router-dom';
 import Fuse from 'fuse.js';
@@ -27,8 +27,51 @@ const Notes: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showMobileSearch, setShowMobileSearch] = useState(true);
+  const lastScrollY = useRef(0);
+  const mainContentRef = useRef<HTMLDivElement>(null);
 
   const selectedNoteSlug = searchParams.get('note');
+
+  // Lógica para ocultar/mostrar búsqueda al hacer scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!mainContentRef.current) return;
+      
+      const currentScrollY = mainContentRef.current.scrollTop;
+      
+      // Solo activamos la lógica si hemos scrolleado un mínimo (ej. 10px)
+      if (Math.abs(currentScrollY - lastScrollY.current) < 10) return;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        setShowMobileSearch(false);
+      } else {
+        setShowMobileSearch(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    const mainElement = mainContentRef.current;
+    if (mainElement) {
+      mainElement.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
+    return () => {
+      if (mainElement) {
+        mainElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [loading]); // Se vuelve a ejecutar cuando termina de cargar
+
+  // Resetear visibilidad y scroll al cambiar de nota
+  useEffect(() => {
+    setShowMobileSearch(true);
+    lastScrollY.current = 0;
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  }, [selectedNoteSlug]);
 
   useEffect(() => {
     const loadNotes = async () => {
@@ -188,6 +231,30 @@ const Notes: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      {/* Barra de búsqueda móvil (Flotante y Centrada) */}
+      <div 
+        className={`
+          md:hidden fixed top-6 inset-x-0 z-50 flex justify-center px-6 pointer-events-none transition-transform duration-300
+          ${showMobileSearch ? 'translate-y-0' : '-translate-y-24'}
+        `}
+      >
+        <div className="w-full max-w-sm pointer-events-auto">
+          <div className="relative group">
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-violet-600 transition-colors" />
+            <input
+              type="text"
+              placeholder="Buscar notas..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value && !isSidebarOpen) setIsSidebarOpen(true);
+              }}
+              className="w-full pl-12 pr-4 py-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl text-sm focus:ring-2 focus:ring-violet-600 transition-all outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Botón menú móvil */}
       <button
         onClick={toggleSidebar}
@@ -204,7 +271,7 @@ const Notes: React.FC = () => {
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full pt-20 md:pt-0">
           <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">Mis Notas</h2>
@@ -216,7 +283,7 @@ const Notes: React.FC = () => {
                 <FiHome size={20} />
               </Link>
             </div>
-            <div className="relative">
+            <div className="relative hidden md:block">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
                 type="text"
@@ -266,7 +333,10 @@ const Notes: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12">
+      <main 
+        ref={mainContentRef}
+        className="flex-1 overflow-y-auto p-4 pt-24 md:p-8 lg:p-12 md:pt-8"
+      >
         <div className="max-w-4xl mx-auto">
           {selectedNote ? (
             <article className="animate-in fade-in slide-in-from-bottom-4 duration-500">
