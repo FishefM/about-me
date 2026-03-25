@@ -40,10 +40,14 @@ const Navbar: React.FC = () => {
     { name: 'Sobre mí', path: '#about' },
     { name: 'Experiencia', path: '#experience' },
     { name: 'Portafolio', path: '#portfolio' },
+    { name: 'Notas', path: '/notes' },
     { name: 'Contacto', path: '#contact' },
   ];
 
-  const getPath = (path: string) => isHomePage ? path : `/${path}`;
+  const getPath = (path: string) => {
+    if (path.startsWith('/')) return path;
+    return isHomePage ? path : `/${path}`;
+  };
 
   const handleCVClick = () => {
     // No prevenimos el default para que el href del PDF funcione, 
