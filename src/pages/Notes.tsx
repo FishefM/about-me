@@ -8,10 +8,21 @@ interface Note {
   slug: string;
   title: string;
   content: string;
+  path: string; // Ruta completa relativa a content/notes
+}
+
+interface Folder {
+  name: string;
+  path: string;
+  files: Note[];
+  folders: { [key: string]: Folder };
+  isOpen?: boolean;
 }
 
 const Notes: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [folderTree, setFolderTree] = useState<Folder | null>(null);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(['root']));
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,20 +32,54 @@ const Notes: React.FC = () => {
 
   useEffect(() => {
     const loadNotes = async () => {
-      const modules = import.meta.glob('../content/notes/*.md', { query: '?raw', import: 'default' });
+      // Cargamos todas las notas incluyendo subdirectorios
+      const modules = import.meta.glob('../content/notes/**/*.md', { query: '?raw', import: 'default' });
       const loadedNotes: Note[] = [];
 
       for (const path in modules) {
+        // Ignoramos archivos en carpetas ocultas como .obsidian
+        if (path.includes('/.')) continue;
+
         const content = await modules[path]() as string;
+        // Obtenemos el slug (nombre del archivo sin extensión)
         const slug = path.split('/').pop()?.replace('.md', '') || '';
+        // Obtenemos la ruta relativa desde content/notes
+        const relativePath = path.replace('../content/notes/', '').replace('.md', '');
+        
         const titleMatch = content.match(/^#\s+(.*)$/m);
         const title = titleMatch ? titleMatch[1] : slug;
-        loadedNotes.push({ slug, title, content });
+        
+        loadedNotes.push({ slug, title, content, path: relativePath });
       }
 
       setNotes(loadedNotes);
       
-      // Si no hay nota en la URL pero hay notas cargadas, seleccionamos la primera
+      // Construimos el árbol de carpetas
+      const tree: Folder = { name: 'root', path: '', files: [], folders: {} };
+      
+      loadedNotes.forEach(note => {
+        const parts = note.path.split('/');
+        let currentFolder = tree;
+        
+        // Recorremos las partes de la ruta (menos el nombre del archivo)
+        for (let i = 0; i < parts.length - 1; i++) {
+          const folderName = parts[i];
+          if (!currentFolder.folders[folderName]) {
+            currentFolder.folders[folderName] = {
+              name: folderName,
+              path: parts.slice(0, i + 1).join('/'),
+              files: [],
+              folders: {}
+            };
+          }
+          currentFolder = currentFolder.folders[folderName];
+        }
+        currentFolder.files.push(note);
+      });
+
+      setFolderTree(tree);
+
+      // Si no hay nota seleccionada, abrimos la primera nota que encontremos
       if (!selectedNoteSlug && loadedNotes.length > 0) {
         setSearchParams({ note: loadedNotes[0].slug }, { replace: true });
       }
@@ -43,6 +88,15 @@ const Notes: React.FC = () => {
 
     loadNotes();
   }, [selectedNoteSlug, setSearchParams]);
+
+  const toggleFolder = (path: string) => {
+    setOpenFolders(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  };
 
   const selectedNote = useMemo(() => {
     return notes.find(n => n.slug === selectedNoteSlug) || null;
@@ -62,15 +116,66 @@ const Notes: React.FC = () => {
   }, [notes]);
 
   const filteredNotes = useMemo(() => {
-    if (!searchQuery) return notes;
+    if (!searchQuery) return null; // Solo mostramos lista plana si hay búsqueda
     return fuse.search(searchQuery).map(result => result.item);
-  }, [searchQuery, notes, fuse]);
+  }, [searchQuery, fuse]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const handleNoteSelect = (slug: string) => {
     setSearchParams({ note: slug });
     setIsSidebarOpen(false);
+  };
+
+  const renderFolder = (folder: Folder, level: number = 0) => {
+    const isOpen = openFolders.has(folder.path || 'root');
+    const hasContent = Object.keys(folder.folders).length > 0 || folder.files.length > 0;
+
+    if (!hasContent && folder.path !== '') return null;
+
+    return (
+      <div key={folder.path || 'root'} className="flex flex-col">
+        {folder.path !== '' && (
+          <button
+            onClick={() => toggleFolder(folder.path)}
+            className="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-left text-zinc-500 dark:text-zinc-400 transition-colors"
+            style={{ paddingLeft: `${(level * 12) + 12}px` }}
+          >
+            <FiChevronRight className={`shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+            <span className="text-xs font-semibold uppercase tracking-wider">{folder.name}</span>
+          </button>
+        )}
+        
+        {isOpen && (
+          <div className="flex flex-col mt-1">
+            {/* Primero mostramos subcarpetas */}
+            {Object.values(folder.folders)
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(subFolder => renderFolder(subFolder, level + 1))}
+            
+            {/* Luego mostramos archivos */}
+            {folder.files
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map(note => (
+                <button
+                  key={note.slug}
+                  onClick={() => handleNoteSelect(note.slug)}
+                  className={`
+                    flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors
+                    ${selectedNoteSlug === note.slug
+                      ? 'bg-violet-600 text-white'
+                      : 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}
+                  `}
+                  style={{ paddingLeft: `${((level + (folder.path === '' ? 0 : 1)) * 12) + 12}px` }}
+                >
+                  <FiFileText className="shrink-0" />
+                  <span className="truncate text-sm font-medium">{note.title}</span>
+                </button>
+              ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -124,11 +229,13 @@ const Notes: React.FC = () => {
           </div>
 
           <nav className="flex-1 overflow-y-auto p-2">
-            {filteredNotes.length > 0 ? (
-              <ul className="space-y-1">
-                {filteredNotes.map((note) => (
-                  <li key={note.slug}>
+            {searchQuery ? (
+              // Vista de búsqueda (plana)
+              <div className="flex flex-col gap-1">
+                {filteredNotes && filteredNotes.length > 0 ? (
+                  filteredNotes.map((note) => (
                     <button
+                      key={note.slug}
                       onClick={() => handleNoteSelect(note.slug)}
                       className={`
                         w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors
@@ -138,16 +245,21 @@ const Notes: React.FC = () => {
                       `}
                     >
                       <FiFileText className="shrink-0" />
-                      <span className="truncate text-sm font-medium">{note.title}</span>
-                      <FiChevronRight className={`ml-auto shrink-0 transition-transform ${selectedNoteSlug === note.slug ? 'rotate-90' : ''}`} />
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="truncate text-sm font-medium">{note.title}</span>
+                        <span className="truncate text-[10px] opacity-60 italic">{note.path}</span>
+                      </div>
                     </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="text-center py-8 text-zinc-500 text-sm">
-                No se encontraron notas
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-zinc-500 text-sm">
+                    No se encontraron notas
+                  </div>
+                )}
               </div>
+            ) : (
+              // Vista de carpetas (árbol)
+              folderTree && renderFolder(folderTree)
             )}
           </nav>
         </div>
@@ -158,7 +270,7 @@ const Notes: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {selectedNote ? (
             <article className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <MarkdownRenderer content={selectedNote.content} />
+              <MarkdownRenderer content={selectedNote.content} allNotes={notes} />
             </article>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
