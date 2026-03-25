@@ -14,6 +14,6 @@ graph TD
 ```
 
 ## Lista de tareas
-- [x] Crear ruta /notes
+- [ ] Crear ruta /notes
 - [ ] Implementar sidebar
 - [ ] Configurar Fuse.js
