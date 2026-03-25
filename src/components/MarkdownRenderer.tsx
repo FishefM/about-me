@@ -14,7 +14,7 @@ interface MarkdownRendererProps {
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   // Función para emular WikiLinks [[Note Name]] o [[Note Name|Alias]]
   const processWikiLinks = (text: string) => {
-    return text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match, target, alias) => {
+    return text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_match, target, alias) => {
       const title = alias || target;
       // Convertimos el objetivo en un slug (minúsculas, espacios a guiones)
       const slug = target.trim().toLowerCase().replace(/\s+/g, '-');

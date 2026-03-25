@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiDownload } from 'react-icons/fi';
 
 const Navbar: React.FC = () => {
@@ -7,6 +7,7 @@ const Navbar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
 
   const cvPdf = '/CV-Yucef-Hernandez.pdf';
@@ -49,12 +50,35 @@ const Navbar: React.FC = () => {
     return isHomePage ? path : `/${path}`;
   };
 
-  const handleCVClick = () => {
-    // No prevenimos el default para que el href del PDF funcione, 
-    // pero usamos setTimeout para navegar a la página de CV justo después
+  const handleCVClick = (_e: React.MouseEvent) => {
+    // Permitimos la descarga del PDF pero navegamos a la página de CV usando react-router
     setTimeout(() => {
-      window.location.href = '/CV';
+      navigate('/CV');
     }, 100);
+  };
+
+  const renderNavLink = (link: { name: string; path: string }, className: string, onClick?: () => void) => {
+    const fullPath = getPath(link.path);
+    if (fullPath.startsWith('/') && !fullPath.includes('#')) {
+      return (
+        <Link
+          to={fullPath}
+          onClick={onClick}
+          className={className}
+        >
+          {link.name}
+        </Link>
+      );
+    }
+    return (
+      <a
+        href={fullPath}
+        onClick={onClick}
+        className={className}
+      >
+        {link.name}
+      </a>
+    );
   };
 
   return (
@@ -73,12 +97,7 @@ const Navbar: React.FC = () => {
             <ul className="flex space-x-8">
               {navLinks.map((link) => (
                 <li key={link.path}>
-                  <a
-                    href={getPath(link.path)}
-                    className="text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-colors hover:text-violet-600"
-                  >
-                    {link.name}
-                  </a>
+                  {renderNavLink(link, "text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-colors hover:text-violet-600")}
                 </li>
               ))}
             </ul>
@@ -127,13 +146,7 @@ const Navbar: React.FC = () => {
         <ul className="px-4 py-6 space-y-4">
           {navLinks.map((link) => (
             <li key={link.path}>
-              <a
-                href={getPath(link.path)}
-                onClick={() => setIsOpen(false)}
-                className="block text-lg font-medium text-zinc-600 dark:text-zinc-400 hover:text-violet-600 transition-colors"
-              >
-                {link.name}
-              </a>
+              {renderNavLink(link, "block text-lg font-medium text-zinc-600 dark:text-zinc-400 hover:text-violet-600 transition-colors", () => setIsOpen(false))}
             </li>
           ))}
         </ul>
