@@ -25,31 +25,37 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
     if (depth > 3) return text;
 
     return text.replace(/^!\[\[([^\]]+)\]\]/gm, (_match, target) => {
-      const targetSlug = target.trim().toLowerCase().replace(/\s+/g, '-');
-      const targetNote = allNotes.find(n => n.slug === targetSlug || n.title.toLowerCase() === target.trim().toLowerCase());
+      const targetName = target.trim();
+      // Buscamos la nota que coincida exactamente con el nombre del archivo (slug)
+      // Obsidian es insensible a mayúsculas/minúsculas en la búsqueda pero prefiere el nombre del archivo
+      const targetNote = allNotes.find(n => n.slug.toLowerCase() === targetName.toLowerCase() || n.slug === targetName);
 
       if (targetNote) {
-        // Limpiamos el contenido de la nota importada
         // Quitamos el título principal si existe (# Título) para no duplicarlo
         let importedContent = targetNote.content.replace(/^#\s+.*$/m, '').trim();
-        
-        // Procesamos transclusiones anidadas recursivamente
         return processTransclusions(importedContent, depth + 1);
       }
       
-      return `> [!WARNING] Nota no encontrada: [[${target}]]`;
+      return `> [!WARNING] Archivo no encontrado: ${targetName}.md`;
     });
   };
 
   // Función para emular WikiLinks [[Note Name]] o [[Note Name|Alias]]
   const processWikiLinks = (text: string) => {
     return text.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_match, target, alias) => {
-      const title = alias || target;
-      // Buscamos si la nota existe para usar su slug real
-      const note = allNotes.find(n => n.title.toLowerCase() === target.trim().toLowerCase() || n.slug === target.trim().toLowerCase().replace(/\s+/g, '-'));
-      const slug = note ? note.slug : target.trim().toLowerCase().replace(/\s+/g, '-');
+      const targetName = target.trim();
+      const title = alias || targetName;
       
-      return `[${title}](/notes?note=${slug})`;
+      // Buscamos si la nota existe por su nombre de archivo
+      const note = allNotes.find(n => n.slug.toLowerCase() === targetName.toLowerCase() || n.slug === targetName);
+      
+      if (note) {
+        return `[${title}](/notes?note=${note.slug})`;
+      }
+      
+      // Si no existe, creamos un link al posible slug (estilo tradicional)
+      const fallbackSlug = targetName.replace(/\s+/g, '-').toLowerCase();
+      return `[${title}](/notes?note=${fallbackSlug})`;
     });
   };
 
