@@ -6,7 +6,7 @@ Esta nota es una prueba de que ahora puedes "inyectar" el contenido de una nota 
 
 Aquí abajo verás el contenido de la nota "Fragmento Reutilizable":
 
-![[Fragmento Reutilizable]]
+![[fragmento-prueba]]
 
 ---
 
@@ -14,7 +14,7 @@ Aquí abajo verás el contenido de la nota "Fragmento Reutilizable":
 
 Aquí abajo aparecerá el contenido de tu nota de bienvenida (incluyendo el diagrama de Mermaid):
 
-![[Bienvenidos a mis notas]]
+![[Bienvenida]]
 
 ---
 
