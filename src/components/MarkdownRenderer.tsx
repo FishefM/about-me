@@ -5,6 +5,18 @@ import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Link } from 'react-router-dom';
+import { 
+  FiInfo, 
+  FiAlertTriangle, 
+  FiZap, 
+  FiCheckCircle, 
+  FiHelpCircle, 
+  FiXCircle, 
+  FiAlertCircle, 
+  FiFileText, 
+  FiEdit3,
+  FiMessageSquare
+} from 'react-icons/fi';
 import Mermaid from './Mermaid';
 
 interface Note {
@@ -18,6 +30,33 @@ interface MarkdownRendererProps {
   allNotes?: Note[];
 }
 
+const CALLOUT_TYPES: Record<string, { icon: any, color: string, label: string }> = {
+  note: { icon: FiEdit3, color: 'blue', label: 'Nota' },
+  info: { icon: FiInfo, color: 'blue', label: 'Información' },
+  todo: { icon: FiCheckCircle, color: 'blue', label: 'Por hacer' },
+  tip: { icon: FiZap, color: 'emerald', label: 'Consejo' },
+  hint: { icon: FiZap, color: 'emerald', label: 'Pista' },
+  important: { icon: FiAlertCircle, color: 'emerald', label: 'Importante' },
+  success: { icon: FiCheckCircle, color: 'emerald', label: 'Éxito' },
+  check: { icon: FiCheckCircle, color: 'emerald', label: 'Hecho' },
+  done: { icon: FiCheckCircle, color: 'emerald', label: 'Completado' },
+  question: { icon: FiHelpCircle, color: 'amber', label: 'Pregunta' },
+  help: { icon: FiHelpCircle, color: 'amber', label: 'Ayuda' },
+  faq: { icon: FiHelpCircle, color: 'amber', label: 'FAQ' },
+  warning: { icon: FiAlertTriangle, color: 'orange', label: 'Advertencia' },
+  caution: { icon: FiAlertTriangle, color: 'orange', label: 'Precaución' },
+  attention: { icon: FiAlertTriangle, color: 'orange', label: 'Atención' },
+  failure: { icon: FiXCircle, color: 'red', label: 'Fallo' },
+  fail: { icon: FiXCircle, color: 'red', label: 'Fallo' },
+  missing: { icon: FiXCircle, color: 'red', label: 'Falta' },
+  danger: { icon: FiAlertTriangle, color: 'red', label: 'Peligro' },
+  error: { icon: FiXCircle, color: 'red', label: 'Error' },
+  bug: { icon: FiAlertCircle, color: 'red', label: 'Error' },
+  example: { icon: FiFileText, color: 'violet', label: 'Ejemplo' },
+  quote: { icon: FiMessageSquare, color: 'zinc', label: 'Cita' },
+  cite: { icon: FiMessageSquare, color: 'zinc', label: 'Cita' },
+};
+
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes = [] }) => {
   // Función para procesar transclusiones ![[Note Name]] (importar contenido)
   const processTransclusions = (text: string, depth = 0): string => {
@@ -27,7 +66,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
     return text.replace(/^!\[\[([^\]]+)\]\]/gm, (_match, target) => {
       const targetName = target.trim();
       // Buscamos la nota que coincida exactamente con el nombre del archivo (slug)
-      // Obsidian es insensible a mayúsculas/minúsculas en la búsqueda pero prefiere el nombre del archivo
       const targetNote = allNotes.find(n => n.slug.toLowerCase() === targetName.toLowerCase() || n.slug === targetName);
 
       if (targetNote) {
@@ -59,8 +97,16 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
     });
   };
 
+  // Función para identificar callouts y marcarlos con un elemento HTML que rehype-raw procesará
+  const processCallouts = (text: string) => {
+    return text.replace(/^>\s*\[!(\w+)\]\s*(.*)$/gm, (_match, type, title) => {
+      return `> <callout-meta data-type="${type.toLowerCase()}">${title || ''}</callout-meta>`;
+    });
+  };
+
   const transcludedContent = processTransclusions(content);
-  const processedContent = processWikiLinks(transcludedContent);
+  const calloutContent = processCallouts(transcludedContent);
+  const processedContent = processWikiLinks(calloutContent);
 
   return (
     <div className="prose prose-zinc dark:prose-invert max-w-none prose-pre:bg-transparent">
@@ -68,6 +114,80 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
+          blockquote({ children }: any) {
+            // Función recursiva para buscar el marcador de callout en el árbol de nodos
+            const findCalloutMetadata = (nodes: any): any => {
+              let metadata = null;
+              React.Children.forEach(nodes, (node: any) => {
+                if (metadata) return;
+                if (node?.type === 'callout-meta') {
+                  metadata = {
+                    type: node.props['data-type'],
+                    title: node.props.children
+                  };
+                } else if (node?.props?.children) {
+                  metadata = findCalloutMetadata(node.props.children);
+                }
+              });
+              return metadata;
+            };
+
+            const metadata = findCalloutMetadata(children);
+
+            if (metadata) {
+              const type = metadata.type;
+              const customTitle = metadata.title;
+              const callout = CALLOUT_TYPES[type] || CALLOUT_TYPES.note;
+              const Icon = callout.icon;
+
+              // Función para limpiar el marcador del árbol de renderizado
+              const cleanNodes = (nodes: any): any => {
+                return React.Children.map(nodes, (node: any) => {
+                  if (node?.type === 'callout-meta') return null;
+                  
+                  if (node?.props?.children) {
+                    const cleanedChildren = cleanNodes(node.props.children);
+                    // Si el nodo quedó vacío (como un párrafo que solo tenía el meta), lo eliminamos
+                    if (React.Children.count(cleanedChildren) === 0 && node.type === 'p') return null;
+                    
+                    return React.cloneElement(node, {
+                      ...node.props,
+                      children: cleanedChildren
+                    });
+                  }
+                  return node;
+                });
+              };
+
+              const cleanedBody = cleanNodes(children);
+
+              const colorMap: Record<string, string> = {
+                blue: 'border-blue-500 bg-blue-500/10 text-blue-900 dark:text-blue-100',
+                emerald: 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+                amber: 'border-amber-500 bg-amber-500/10 text-amber-900 dark:text-amber-100',
+                orange: 'border-orange-500 bg-orange-500/10 text-orange-900 dark:text-orange-100',
+                red: 'border-red-500 bg-red-500/10 text-red-900 dark:text-red-100',
+                violet: 'border-violet-500 bg-violet-500/10 text-violet-900 dark:text-violet-100',
+                zinc: 'border-zinc-500 bg-zinc-500/10 text-zinc-900 dark:text-zinc-100',
+              };
+
+              return (
+                <div className={`my-6 border-l-4 rounded-r-lg overflow-hidden not-italic shadow-sm border-opacity-100 ${colorMap[callout.color]}`}>
+                  <div className="flex items-center gap-2 px-4 py-2 font-bold bg-black/5 dark:bg-white/5 border-b border-black/5 dark:border-white/5">
+                    <Icon className="shrink-0" size={18} />
+                    <span className="text-sm uppercase tracking-wide">
+                      {customTitle && React.Children.count(customTitle) > 0 ? customTitle : callout.label}
+                    </span>
+                  </div>
+                  <div className="px-4 py-2 prose-p:my-2 prose-blockquote:before:content-none prose-blockquote:after:content-none prose-blockquote:border-none prose-blockquote:pl-0">
+                    {cleanedBody}
+                  </div>
+                </div>
+              );
+            }
+
+            return <blockquote className="border-l-4 border-zinc-200 dark:border-zinc-800 pl-4 my-6 italic text-zinc-600 dark:text-zinc-400">{children}</blockquote>;
+          },
           // Usamos Link de react-router para enlaces internos
           a({ node, href, children, ...props }: any) {
             const isInternal = href?.startsWith('/notes?note=') || href?.startsWith('#');
