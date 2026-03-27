@@ -89,8 +89,8 @@ const Notes: React.FC = () => {
         // Obtenemos la ruta relativa desde content/notes
         const relativePath = path.replace('../content/notes/', '').replace('.md', '');
         
-        const titleMatch = content.match(/^#\s+(.*)$/m);
-        const title = titleMatch ? titleMatch[1] : slug;
+        // El título ahora será siempre el nombre del archivo (slug) formateado
+        const title = slug.replace(/[-_]/g, ' ');
         
         loadedNotes.push({ slug, title, content, path: relativePath });
       }

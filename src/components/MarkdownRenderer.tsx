@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -15,7 +15,9 @@ import {
   FiAlertCircle, 
   FiFileText, 
   FiEdit3,
-  FiMessageSquare
+  FiMessageSquare,
+  FiCopy,
+  FiCheck
 } from 'react-icons/fi';
 import Mermaid from './Mermaid';
 
@@ -61,6 +63,78 @@ interface CalloutMetadata {
   type: string;
   title: any;
 }
+
+const CodeBlock: React.FC<any> = ({ children, language, className, inline, ...props }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const codeString = Array.isArray(children) 
+      ? children.join('') 
+      : String(children).replace(/\n$/, '');
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(codeString);
+        setCopied(true);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = codeString;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) setCopied(true);
+        } catch (err) {
+          console.error('Fallback copy failed', err);
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const match = /language-(\w+)/.exec(className || '');
+  const lang = language || (match ? match[1] : '');
+
+  if (lang === 'mermaid') {
+    return <Mermaid chart={String(children).replace(/\n$/, '')} />;
+  }
+
+  if (inline || !lang) {
+    return <code className={className} {...props}>{children}</code>;
+  }
+
+  return (
+    <div className="relative group my-4">
+      <button
+        onClick={handleCopy}
+        className="absolute right-2 top-2 p-2 rounded-md bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 transition-all duration-200 z-20 shadow-md border border-white/10"
+        title="Copiar código"
+      >
+        {copied ? <FiCheck size={16} className="text-emerald-500" /> : <FiCopy size={16} />}
+      </button>
+      <SyntaxHighlighter
+        style={vscDarkPlus}
+        language={lang}
+        PreTag="div"
+        className="rounded-lg !my-0"
+        {...props}
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    </div>
+  );
+};
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes = [] }) => {
   // Función para procesar transclusiones ![[Note Name]] (importar contenido)
@@ -218,27 +292,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
             );
           },
           code({ node, inline, className, children, ...props }: any) {
-            const match = /language-(\w+)/.exec(className || '');
-            const language = match ? match[1] : '';
-
-            if (language === 'mermaid') {
-              return <Mermaid chart={String(children).replace(/\n$/, '')} />;
-            }
-
-            return !inline && match ? (
-              <SyntaxHighlighter
-                style={vscDarkPlus}
-                language={language}
-                PreTag="div"
-                className="rounded-lg !my-4"
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
+            return (
+              <CodeBlock 
+                inline={inline} 
+                className={className} 
+                children={children} 
+                {...props} 
+              />
             );
           },
         }}
