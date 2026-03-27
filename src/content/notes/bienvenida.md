@@ -1,6 +1,7 @@
 # Bienvenidos a mis notas
 
-Este es un ejemplo de una nota en Markdown que incluye un diagrama de **Mermaid**.
+> [!TIP] Notas personales
+> En su mayoria solo seran comandos en terminal que necesito tener siempre a la mano.
 
 ## Diagrama de Flujo
 
