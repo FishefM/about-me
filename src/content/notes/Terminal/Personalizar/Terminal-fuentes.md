@@ -4,7 +4,7 @@ curl -fLo ~/.termux/font.ttf https://github.com/ryanoasis/nerd-fonts/raw/master/
 ```
 ### Termux
 - Descargar en .termux
-```
+```bash
 # Instalar Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 

@@ -19,6 +19,7 @@ Host servidor-trabajo
     User yucef
     Port 22
     IdentityFile ~/.ssh/id_ed25519_trabajo
+    AddKeysToAgent yes
 
 ```
 ## Agregar al agente
@@ -36,7 +37,7 @@ Se usa una bandera
 ```bash
 ssh-copy-id -i ~/.ssh/id_ed25519_servidor-trabajo usuario@ip-del-servidor
 ```
-O mediante el archivo .ssh/config
+O mediante el archivo .ssh/config (Se usa la ultima llave creada)
 ```bash
 ssh-copy-id servidor-trabajo
 ```
