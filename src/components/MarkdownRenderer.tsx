@@ -5,7 +5,7 @@ import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Link } from 'react-router-dom';
-import { IconType } from 'react-icons';
+import type { IconType } from 'react-icons';
 import { 
   FiInfo, 
   FiAlertTriangle, 
