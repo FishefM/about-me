@@ -169,7 +169,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
     // Límite de seguridad para evitar bucles infinitos (máximo 3 niveles)
     if (depth > 3) return text;
 
-    return text.replace(/!\[\[([^\]]+)\]\]/g, (match, target) => {
+    return text.replace(/!\[\[([^\]]+)\]\]/g, (_match, target) => {
       const targetName = target.trim();
 
       // 1. Intentamos buscar si es una imagen en el mapa de imágenes
@@ -244,7 +244,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
-          blockquote({ children }: { children: React.ReactNode }) {
+          blockquote({ children }: { children?: React.ReactNode }) {
             // Función recursiva para buscar el marcador de callout en el árbol de nodos
             const findCalloutMetadata = (nodes: React.ReactNode): CalloutMetadata | null => {
               let metadata: CalloutMetadata | null = null;
@@ -256,8 +256,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
                     type: props['data-type'],
                     title: props.children
                   };
-                } else if (React.isValidElement(node) && node.props.children) {
-                  metadata = findCalloutMetadata(node.props.children as React.ReactNode);
+                } else if (React.isValidElement(node) && 'props' in node && (node.props as any).children) {
+                  metadata = findCalloutMetadata((node.props as any).children as React.ReactNode);
                 }
               });
               return metadata;
@@ -276,8 +276,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
                 return React.Children.map(nodes, (node) => {
                   if (React.isValidElement(node) && node.type === 'callout-meta') return null;
                   
-                  if (React.isValidElement(node) && node.props.children) {
-                    const cleanedChildren = cleanNodes(node.props.children as React.ReactNode);
+                  if (React.isValidElement(node) && 'props' in node && (node.props as any).children) {
+                    const cleanedChildren = cleanNodes((node.props as any).children as React.ReactNode);
                     // Si el nodo quedó vacío (como un párrafo que solo tenía el meta), lo eliminamos
                     if (React.Children.count(cleanedChildren) === 0 && node.type === 'p') return null;
                     
@@ -342,10 +342,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, allNotes =
               </a>
             );
           },
-          code({ inline, className, children, ...props }) {
+          code({ className, children, ...props }) {
             return (
               <CodeBlock 
-                inline={inline} 
                 className={className} 
                 {...props} 
               >
