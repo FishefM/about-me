@@ -21,6 +21,7 @@ interface Folder {
 
 const Notes: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
   const [folderTree, setFolderTree] = useState<Folder | null>(null);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(['root']));
   const [searchParams, setSearchParams] = useSearchParams();
@@ -80,8 +81,8 @@ const Notes: React.FC = () => {
       const loadedNotes: Note[] = [];
 
       for (const path in modules) {
-        // Ignoramos archivos en carpetas ocultas como .obsidian
-        if (path.includes('/.')) continue;
+        // Ignoramos archivos en carpetas ocultas como .obsidian o en adjuntos
+        if (path.includes('/.') || path.includes('/adjuntos/')) continue;
 
         const content = await modules[path]() as string;
         // Obtenemos el slug (nombre del archivo sin extensión)
@@ -96,6 +97,15 @@ const Notes: React.FC = () => {
       }
 
       setNotes(loadedNotes);
+
+      // Cargamos imágenes de las carpetas adjuntos
+      const imageModules = import.meta.glob('../content/notes/**/adjuntos/*', { query: '?url', import: 'default', eager: true });
+      const images: Record<string, string> = {};
+      for (const path in imageModules) {
+        const filename = decodeURIComponent(path.split('/').pop() || '');
+        images[filename] = imageModules[path] as string;
+      }
+      setImageMap(images);
       
       // Construimos el árbol de carpetas
       const tree: Folder = { name: 'root', path: '', files: [], folders: {} };
@@ -107,6 +117,9 @@ const Notes: React.FC = () => {
         // Recorremos las partes de la ruta (menos el nombre del archivo)
         for (let i = 0; i < parts.length - 1; i++) {
           const folderName = parts[i];
+          // Doble verificación para no mostrar carpetas adjuntos en el árbol
+          if (folderName === 'adjuntos') continue;
+
           if (!currentFolder.folders[folderName]) {
             currentFolder.folders[folderName] = {
               name: folderName,
@@ -340,7 +353,11 @@ const Notes: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {selectedNote ? (
             <article className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <MarkdownRenderer content={selectedNote.content} allNotes={notes} />
+              <MarkdownRenderer 
+                content={selectedNote.content} 
+                allNotes={notes} 
+                imageMap={imageMap} 
+              />
             </article>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-zinc-500">
