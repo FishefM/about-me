@@ -18,4 +18,3 @@ Aquí abajo aparecerá el contenido de tu nota de bienvenida (incluyendo el diag
 
 ---
 
-¡Y eso es todo! Como ves, el sistema limpia los títulos `#` de las notas importadas para que la estructura de esta nota principal sea limpia.
