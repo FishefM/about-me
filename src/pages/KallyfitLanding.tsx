@@ -13,17 +13,62 @@ import {
   FiRotateCcw,
   FiChevronDown,
   FiAward,
-  FiTrendingUp
+  FiTrendingUp,
+  FiX,
+  FiRefreshCw,
+  FiExternalLink
 } from 'react-icons/fi';
 import kallyfitIcon from '../assets/kallyfit-icon.png';
 import BiomechanicFigure from '../components/BiomechanicFigure';
+
+const WORKER_API = import.meta.env.VITE_KALLYFIT_API_URL || 'https://kallyfit.yucefhernandez.com';
 
 const KallyfitLanding: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'push' | 'pull' | 'skills' | 'legs'>('push');
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // Estados para el Modal de Leaderboard en Vivo
+  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState(false);
+  const [modalRankingType, setModalRankingType] = useState<'monthly' | 'total'>('monthly');
+  const [liveAthletes, setLiveAthletes] = useState<any[]>([]);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
   const downloadUrl = 'https://tokiserver.com/drive/kallyfit/kallyfit-v1.0.7.apk';
+
+  // Función para consultar el Worker en tiempo real
+  const fetchWorkerLeaderboard = async (type: 'monthly' | 'total') => {
+    setIsLoadingLeaderboard(true);
+    setLeaderboardError(null);
+    try {
+      const res = await fetch(`${WORKER_API}/api/leaderboard?type=${type}&limit=50`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.athletes)) {
+        setLiveAthletes(data.athletes);
+        setLastUpdated(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      } else {
+        throw new Error('Estructura de datos inválida del servidor');
+      }
+    } catch (err: any) {
+      setLeaderboardError('No se pudo conectar con el Worker en tiempo real: ' + err.message);
+    } finally {
+      setIsLoadingLeaderboard(false);
+    }
+  };
+
+  const handleOpenModal = (type: 'monthly' | 'total' = 'monthly') => {
+    setModalRankingType(type);
+    setIsLeaderboardModalOpen(true);
+    fetchWorkerLeaderboard(type);
+  };
+
+  const handleTabChange = (type: 'monthly' | 'total') => {
+    setModalRankingType(type);
+    fetchWorkerLeaderboard(type);
+  };
 
   const routinesData = {
     push: {
@@ -167,13 +212,14 @@ const KallyfitLanding: React.FC = () => {
               <span>Descargar Kallyfit para Android (.APK)</span>
             </a>
 
-            <Link
-              to="/dev/kallyfit/leaderboard"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#161b22] border border-[#30363d] text-[#58a6ff] font-bold text-base hover:bg-[#21262d] transition-all"
+            <button
+              type="button"
+              onClick={() => handleOpenModal('monthly')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-[#161b22] border border-[#30363d] text-[#58a6ff] font-bold text-base hover:bg-[#21262d] transition-all cursor-pointer shadow-lg hover:border-[#58a6ff]/50 active:scale-95"
             >
               <FiAward className="text-lg" />
               <span>Ver Leaderboard de Atletas</span>
-            </Link>
+            </button>
           </div>
 
           <div className="text-xs text-[#8b949e] flex flex-wrap justify-center items-center gap-4 pt-1 font-mono">
@@ -296,13 +342,14 @@ const KallyfitLanding: React.FC = () => {
             </p>
           </div>
 
-          <Link
-            to="/dev/kallyfit/leaderboard"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#1f6feb] hover:bg-[#58a6ff] text-white font-bold text-sm shadow-lg shadow-blue-500/20 active:scale-95 transition-all shrink-0"
+          <button
+            type="button"
+            onClick={() => handleOpenModal('monthly')}
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#1f6feb] hover:bg-[#58a6ff] text-white font-bold text-sm shadow-lg shadow-blue-500/20 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             <FiTrendingUp className="text-base" />
-            <span>Ver Leaderboard Completo</span>
-          </Link>
+            <span>Ver Leaderboard en Vivo</span>
+          </button>
         </section>
 
         {/* CORE FEATURES GRID */}
@@ -542,6 +589,166 @@ const KallyfitLanding: React.FC = () => {
           </p>
         </footer>
       </div>
+
+      {/* MODAL DE LEADERBOARD EN VIVO (CONECTADO DIRECTAMENTE AL WORKER) */}
+      {isLeaderboardModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-2xl bg-[#161b22] border border-[#30363d] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-[#30363d] flex items-center justify-between bg-[#0d1117]/80">
+              <div className="flex items-center gap-3">
+                <img src={kallyfitIcon} alt="Kallyfit" className="w-8 h-8 rounded-xl border border-[#30363d]" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-white">Leaderboard Oficial de Atletas</h3>
+                    <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#238636]/20 border border-[#238636]/60 text-[#3fb950]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse"></span>
+                      Cloudflare Edge Live
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#8b949e]">
+                    Datos sincronizados en tiempo real desde el Worker • {lastUpdated ? `Última sincronización: ${lastUpdated}` : 'Consultando...'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsLeaderboardModalOpen(false)}
+                className="w-9 h-9 rounded-xl bg-[#21262d] hover:bg-[#30363d] text-[#8b949e] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <FiX className="text-lg" />
+              </button>
+            </div>
+
+            {/* Modal Tabs & Refresh Bar */}
+            <div className="px-5 py-3 border-b border-[#30363d] flex flex-wrap items-center justify-between gap-3 bg-[#161b22]">
+              <div className="flex p-1 bg-[#0d1117] rounded-xl border border-[#30363d]">
+                <button
+                  onClick={() => handleTabChange('monthly')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    modalRankingType === 'monthly'
+                      ? 'bg-[#1f6feb] text-white shadow-sm'
+                      : 'text-[#8b949e] hover:text-white'
+                  }`}
+                >
+                  Ranking Mensual
+                </button>
+                <button
+                  onClick={() => handleTabChange('total')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    modalRankingType === 'total'
+                      ? 'bg-[#1f6feb] text-white shadow-sm'
+                      : 'text-[#8b949e] hover:text-white'
+                  }`}
+                >
+                  Ranking Total (XP)
+                </button>
+              </div>
+
+              <button
+                onClick={() => fetchWorkerLeaderboard(modalRankingType)}
+                disabled={isLoadingLeaderboard}
+                className="inline-flex items-center gap-1.5 text-xs text-[#58a6ff] hover:text-[#79c0ff] font-semibold transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <FiRefreshCw className={`text-xs ${isLoadingLeaderboard ? 'animate-spin' : ''}`} />
+                <span>Refrescar</span>
+              </button>
+            </div>
+
+            {/* Modal Athletes List */}
+            <div className="p-5 overflow-y-auto space-y-3 flex-grow">
+              {isLoadingLeaderboard ? (
+                <div className="py-16 text-center space-y-3">
+                  <div className="w-8 h-8 mx-auto border-4 border-[#58a6ff] border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-xs text-[#8b949e]">Consultando atletas en vivo en Cloudflare Edge (D1)...</p>
+                </div>
+              ) : leaderboardError ? (
+                <div className="py-12 text-center space-y-3 p-4 rounded-2xl bg-red-950/20 border border-red-800/40">
+                  <p className="text-xs text-red-400">{leaderboardError}</p>
+                  <button
+                    onClick={() => fetchWorkerLeaderboard(modalRankingType)}
+                    className="px-4 py-2 rounded-xl bg-[#21262d] text-white text-xs font-bold hover:bg-[#30363d]"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              ) : liveAthletes.length === 0 ? (
+                <div className="py-12 text-center text-xs text-[#8b949e]">
+                  No hay atletas registrados en este ranking aún.
+                </div>
+              ) : (
+                <div className="divide-y divide-[#30363d]/60">
+                  {liveAthletes.map((athlete: any) => {
+                    const score = modalRankingType === 'monthly' ? athlete.scoreMonthly : athlete.scoreTotal;
+                    const isTop1 = athlete.rank === 1;
+                    const isTop2 = athlete.rank === 2;
+                    const isTop3 = athlete.rank === 3;
+                    return (
+                      <div
+                        key={athlete.id || athlete.athleteName}
+                        className={`py-3 px-3 rounded-xl flex items-center justify-between gap-3 transition-colors ${
+                          isTop1 ? 'bg-[#58a6ff]/10 border border-[#58a6ff]/20' : 'hover:bg-[#21262d]/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`w-7 h-7 rounded-lg font-mono font-black text-xs flex items-center justify-center shrink-0 ${
+                              isTop1
+                                ? 'bg-[#ffd700]/20 text-[#ffd700] border border-[#ffd700]/40'
+                                : isTop2
+                                ? 'bg-[#c0c0c0]/20 text-[#e6edf3] border border-[#c0c0c0]/40'
+                                : isTop3
+                                ? 'bg-[#cd7f32]/20 text-[#a371f7] border border-[#cd7f32]/40'
+                                : 'bg-[#0d1117] text-[#8b949e] border border-[#30363d]'
+                            }`}
+                          >
+                            #{athlete.rank}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-white">{athlete.athleteName}</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#21262d] text-[#8b949e]">
+                                {athlete.country || 'MX'}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-[#8b949e]">{athlete.specialty || 'Calistenia'}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="font-black text-sm text-white font-mono block">
+                            {Number(score || 0).toLocaleString()} <span className="text-[10px] text-[#58a6ff]">XP</span>
+                          </span>
+                          <span className="text-[11px] text-[#3fb950] font-mono">
+                            Racha: {athlete.streakDays || 1} d
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 px-6 border-t border-[#30363d] bg-[#0d1117] flex items-center justify-between">
+              <Link
+                to="/dev/kallyfit/leaderboard"
+                onClick={() => setIsLeaderboardModalOpen(false)}
+                className="inline-flex items-center gap-1.5 text-xs text-[#58a6ff] hover:text-[#79c0ff] font-bold transition-colors"
+              >
+                <span>Ver página completa con podio y filtros</span>
+                <FiExternalLink className="text-xs" />
+              </Link>
+              <button
+                onClick={() => setIsLeaderboardModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-[#21262d] hover:bg-[#30363d] text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

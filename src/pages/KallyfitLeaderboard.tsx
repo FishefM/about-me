@@ -8,7 +8,8 @@ import {
   FiTrendingUp, 
   FiCalendar, 
   FiShield,
-  FiX
+  FiX,
+  FiRefreshCw
 } from 'react-icons/fi';
 import kallyfitIcon from '../assets/kallyfit-icon.png';
 import { leaderboardAthletes, type AthleteRankItem } from '../data/kallyfitLeaderboard';
@@ -20,45 +21,48 @@ const KallyfitLeaderboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [liveAthletes, setLiveAthletes] = useState<AthleteRankItem[] | null>(null);
   const [isLiveSync, setIsLiveSync] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const downloadUrl = 'https://tokiserver.com/drive/kallyfit/kallyfit-v1.0.7.apk';
 
-  // Intentar sincronizar datos en tiempo real desde Cloudflare Worker D1
-  useEffect(() => {
-    let isMounted = true;
-    const fetchLiveRankings = async () => {
-      try {
-        const res = await fetch(`${WORKER_API}/api/leaderboard?type=${rankingType}&limit=50`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.athletes) && data.athletes.length > 0 && isMounted) {
-          const mapped: AthleteRankItem[] = data.athletes.map((a: any, idx: number) => ({
-            id: a.id || `ath_${idx}`,
-            displayName: a.athleteName,
-            username: `@${a.athleteName.toLowerCase().replace(/\s+/g, '_')}`,
-            avatarUrl: `https://images.unsplash.com/photo-${1534528741775 + (idx * 1337)}?w=120&auto=format&fit=crop&q=80`,
-            country: a.country || 'MX',
-            countryName: a.country === 'MX' ? 'México' : a.country === 'ES' ? 'España' : a.country === 'AR' ? 'Argentina' : a.country === 'CO' ? 'Colombia' : 'Global',
-            specialty: a.specialty || 'Calistenia',
-            title: a.scoreTotal > 30000 ? 'Atleta Élite' : a.scoreTotal > 20000 ? 'Avanzado Pro' : 'Intermedio Activo',
-            rankMonthly: rankingType === 'monthly' ? a.rank : idx + 1,
-            rankTotal: rankingType === 'total' ? a.rank : idx + 1,
-            monthlyScore: a.scoreMonthly,
-            totalXp: a.scoreTotal,
-            streakDays: a.streakDays,
-            verified: true,
-          }));
-          setLiveAthletes(mapped);
-          setIsLiveSync(true);
-        }
-      } catch (err) {
-        // Fallback silencioso a datos locales en caso de desconexión
-        if (isMounted) setIsLiveSync(false);
+  const fetchLiveRankings = async (type = rankingType) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${WORKER_API}/api/leaderboard?type=${type}&limit=50`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.athletes) && data.athletes.length > 0) {
+        const mapped: AthleteRankItem[] = data.athletes.map((a: any, idx: number) => ({
+          id: a.id || `ath_${idx}`,
+          displayName: a.athleteName,
+          username: `@${a.athleteName.toLowerCase().replace(/\s+/g, '_')}`,
+          avatarUrl: `https://images.unsplash.com/photo-${1534528741775 + (idx * 1337)}?w=120&auto=format&fit=crop&q=80`,
+          country: a.country || 'MX',
+          countryName: a.country === 'MX' ? 'México' : a.country === 'ES' ? 'España' : a.country === 'AR' ? 'Argentina' : a.country === 'CO' ? 'Colombia' : 'Global',
+          specialty: a.specialty || 'Calistenia',
+          title: a.scoreTotal > 30000 ? 'Atleta Élite' : a.scoreTotal > 20000 ? 'Avanzado Pro' : 'Intermedio Activo',
+          rankMonthly: type === 'monthly' ? a.rank : idx + 1,
+          rankTotal: type === 'total' ? a.rank : idx + 1,
+          monthlyScore: a.scoreMonthly,
+          totalXp: a.scoreTotal,
+          streakDays: a.streakDays,
+          monthlySessions: Math.max(1, Math.round((a.scoreMonthly || 0) / 160)),
+          totalSessions: Math.max(1, Math.round((a.scoreTotal || 0) / 220)),
+          verified: true,
+        }));
+        setLiveAthletes(mapped);
+        setIsLiveSync(true);
       }
-    };
+    } catch (err) {
+      // Fallback silencioso a datos locales en caso de desconexión
+      setIsLiveSync(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchLiveRankings();
-    return () => { isMounted = false; };
+  useEffect(() => {
+    fetchLiveRankings(rankingType);
   }, [rankingType]);
 
   const currentDataSource = liveAthletes || leaderboardAthletes;
@@ -198,24 +202,35 @@ const KallyfitLeaderboard: React.FC = () => {
             </button>
           </div>
 
-          {/* Search */}
-          <div className="relative w-full sm:w-72">
-            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8b949e] text-sm" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar atleta o especialidad..."
-              className="w-full pl-9 pr-8 py-2 bg-[#0d1117] border border-[#30363d] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#58a6ff] text-white placeholder-[#6e7681]"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#8b949e] hover:text-white"
-              >
-                <FiX />
-              </button>
-            )}
+          {/* Search & Refresh */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8b949e] text-sm" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar atleta o especialidad..."
+                className="w-full pl-9 pr-8 py-2 bg-[#0d1117] border border-[#30363d] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#58a6ff] text-white placeholder-[#6e7681]"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#8b949e] hover:text-white"
+                >
+                  <FiX />
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => fetchLiveRankings(rankingType)}
+              disabled={isLoading}
+              title="Refrescar datos en vivo desde Cloudflare Edge"
+              className="p-2.5 rounded-xl bg-[#0d1117] hover:bg-[#21262d] border border-[#30363d] text-[#58a6ff] hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <FiRefreshCw className={`text-sm ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
 
