@@ -704,12 +704,7 @@ const KallyfitLanding: React.FC = () => {
                             #{athlete.rank}
                           </span>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-white">{athlete.athleteName}</span>
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#21262d] text-[#8b949e]">
-                                {athlete.country || 'MX'}
-                              </span>
-                            </div>
+                            <span className="font-bold text-sm text-white block">{athlete.athleteName}</span>
                             <span className="text-[11px] text-[#8b949e]">{athlete.specialty || 'Calistenia'}</span>
                           </div>
                         </div>
@@ -718,8 +713,8 @@ const KallyfitLanding: React.FC = () => {
                           <span className="font-black text-sm text-white font-mono block">
                             {Number(score || 0).toLocaleString()} <span className="text-[10px] text-[#58a6ff]">XP</span>
                           </span>
-                          <span className="text-[11px] text-[#3fb950] font-mono">
-                            Racha: {athlete.streakDays || 1} d
+                          <span className="text-[11px] text-[#8b949e] font-mono">
+                            {modalRankingType === 'monthly' ? 'Puntos Mes' : 'Total XP'}
                           </span>
                         </div>
                       </div>

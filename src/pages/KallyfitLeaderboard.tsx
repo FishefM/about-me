@@ -37,17 +37,14 @@ const KallyfitLeaderboard: React.FC = () => {
           displayName: a.athleteName,
           username: `@${a.athleteName.toLowerCase().replace(/\s+/g, '_')}`,
           avatarUrl: `https://images.unsplash.com/photo-${1534528741775 + (idx * 1337)}?w=120&auto=format&fit=crop&q=80`,
-          country: a.country || 'MX',
-          countryName: a.country === 'MX' ? 'México' : a.country === 'ES' ? 'España' : a.country === 'AR' ? 'Argentina' : a.country === 'CO' ? 'Colombia' : 'Global',
           specialty: a.specialty || 'Calistenia',
-          title: a.scoreTotal > 30000 ? 'Atleta Élite' : a.scoreTotal > 20000 ? 'Avanzado Pro' : 'Intermedio Activo',
+          title: a.scoreTotal > 10000 ? 'Atleta Élite & Creador' : a.scoreTotal > 50 ? 'Atleta Comunidad' : 'Atleta Comunidad',
           rankMonthly: type === 'monthly' ? a.rank : idx + 1,
           rankTotal: type === 'total' ? a.rank : idx + 1,
           monthlyScore: a.scoreMonthly,
           totalXp: a.scoreTotal,
-          streakDays: a.streakDays,
-          monthlySessions: Math.max(1, Math.round((a.scoreMonthly || 0) / 160)),
-          totalSessions: Math.max(1, Math.round((a.scoreTotal || 0) / 220)),
+          monthlySessions: a.athleteName === 'Yucef' ? 14 : a.athleteName === 'Kitzya' ? 2 : 0,
+          totalSessions: a.athleteName === 'Yucef' ? 14 : a.athleteName === 'Kitzya' ? 2 : 0,
           verified: true,
         }));
         setLiveAthletes(mapped);
@@ -295,7 +292,6 @@ const KallyfitLeaderboard: React.FC = () => {
                 </div>
                 <div className="text-right text-xs font-mono text-[#3fb950] font-bold">
                   <span>{rankingType === 'monthly' ? topThree[0].monthlySessions : topThree[0].totalSessions} sesiones</span>
-                  <span className="block text-[11px] text-[#8b949e]">Racha: {topThree[0].streakDays} días</span>
                 </div>
               </div>
             </div>
@@ -408,10 +404,9 @@ const KallyfitLeaderboard: React.FC = () => {
 
                       {/* Right: Metrics & XP Progress Bar */}
                       <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-8 self-stretch sm:self-auto pl-12 sm:pl-0">
-                        {/* Streak & Sessions */}
+                        {/* Sessions */}
                         <div className="text-left sm:text-right text-xs font-mono">
                           <span className="text-white font-bold block">{currentSessions} sesiones</span>
-                          <span className="text-[#8b949e] text-[11px]">{athlete.streakDays} días racha</span>
                         </div>
 
                         {/* Points & Progress Bar */}
