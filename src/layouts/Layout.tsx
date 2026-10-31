@@ -5,15 +5,15 @@ import TechIcon from '../components/TechIcon';
 
 const Layout: React.FC = () => {
   const location = useLocation();
-  const isNotesPage = location.pathname === '/notes';
+  const isStandalonePage = location.pathname === '/notes' || location.pathname.startsWith('/dev/kallyfit');
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col w-full overflow-x-hidden">
-      {!isNotesPage && <Navbar />}
-      <main className={`flex-grow w-full ${isNotesPage ? '' : 'px-4 md:px-0'}`}>
+      {!isStandalonePage && <Navbar />}
+      <main className="flex-grow w-full">
         <Outlet />
       </main>
-      {!isNotesPage && (
+      {!isStandalonePage && (
         <footer className="py-8 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-center text-sm text-zinc-500 w-full mt-auto">
           <div className="flex flex-col items-center gap-2">
             <p>© {new Date().getFullYear()} - Diseñado con</p>

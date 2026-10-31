@@ -142,8 +142,8 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div className={`md:hidden absolute w-full bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out ${isOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <ul className="px-4 py-6 space-y-4">
+      <div className={`md:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 shadow-2xl transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden pointer-events-none'}`}>
+        <ul className="px-6 py-6 space-y-4">
           {navLinks.map((link) => (
             <li key={link.path}>
               {renderNavLink(link, "block text-lg font-medium text-zinc-600 dark:text-zinc-400 hover:text-violet-600 transition-colors", () => setIsOpen(false))}
