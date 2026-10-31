@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+#Obsidian
+src/content/notes/.obsidian/*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +28,7 @@ dist-ssr
 
 #FreePBX
 #src/content/notes/FreePBX/*
+
+#Notas privadas
+src/content/notes/Privado/*
+
