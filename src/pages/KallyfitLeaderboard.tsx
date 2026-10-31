@@ -35,16 +35,15 @@ const KallyfitLeaderboard: React.FC = () => {
         const mapped: AthleteRankItem[] = data.athletes.map((a: any, idx: number) => ({
           id: a.id || `ath_${idx}`,
           displayName: a.athleteName,
-          username: `@${a.athleteName.toLowerCase().replace(/\s+/g, '_')}`,
+          username: a.athleteName.toLowerCase().replace(/\s+/g, '_'),
           avatarUrl: `https://images.unsplash.com/photo-${1534528741775 + (idx * 1337)}?w=120&auto=format&fit=crop&q=80`,
-          specialty: a.specialty || 'Calistenia',
-          title: a.scoreTotal > 10000 ? 'Atleta Élite & Creador' : a.scoreTotal > 50 ? 'Atleta Comunidad' : 'Atleta Comunidad',
+          title: a.scoreTotal > 5000 ? 'Atleta Élite & Creador' : 'Atleta Comunidad',
           rankMonthly: type === 'monthly' ? a.rank : idx + 1,
           rankTotal: type === 'total' ? a.rank : idx + 1,
           monthlyScore: a.scoreMonthly,
           totalXp: a.scoreTotal,
-          monthlySessions: a.athleteName === 'Yucef' ? 14 : a.athleteName === 'Kitzya' ? 2 : 0,
-          totalSessions: a.athleteName === 'Yucef' ? 14 : a.athleteName === 'Kitzya' ? 2 : 0,
+          monthlySessions: a.athleteName === 'Yucef' ? 9 : a.athleteName === 'Kitzya' ? 1 : 0,
+          totalSessions: a.athleteName === 'Yucef' ? 9 : a.athleteName === 'Kitzya' ? 1 : 0,
           verified: true,
         }));
         setLiveAthletes(mapped);
@@ -80,8 +79,7 @@ const KallyfitLeaderboard: React.FC = () => {
       a =>
         a.displayName.toLowerCase().includes(q) ||
         a.username.toLowerCase().includes(q) ||
-        a.title.toLowerCase().includes(q) ||
-        a.specialty.toLowerCase().includes(q)
+        a.title.toLowerCase().includes(q)
     );
   }, [currentDataSource, rankingType, searchQuery]);
 
@@ -396,8 +394,6 @@ const KallyfitLeaderboard: React.FC = () => {
                           </div>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-[#8b949e]">
                             <span>{athlete.title}</span>
-                            <span>•</span>
-                            <span className="text-[#3fb950] font-medium">{athlete.specialty}</span>
                           </div>
                         </div>
                       </div>

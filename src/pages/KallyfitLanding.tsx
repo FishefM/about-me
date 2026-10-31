@@ -705,7 +705,6 @@ const KallyfitLanding: React.FC = () => {
                           </span>
                           <div>
                             <span className="font-bold text-sm text-white block">{athlete.athleteName}</span>
-                            <span className="text-[11px] text-[#8b949e]">{athlete.specialty || 'Calistenia'}</span>
                           </div>
                         </div>
 

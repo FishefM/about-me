@@ -11,7 +11,6 @@ export interface AthleteRankItem {
   totalXp: number;
   monthlySessions: number;
   totalSessions: number;
-  specialty: string;
   verified?: boolean;
 }
 
@@ -25,11 +24,10 @@ export const leaderboardAthletes: AthleteRankItem[] = [
     rankTotal: 1,
     title: 'Atleta Élite & Creador',
     level: 'Nivel 28 • Élite',
-    monthlyScore: 11112,
-    totalXp: 11112,
-    monthlySessions: 14,
-    totalSessions: 14,
-    specialty: 'Front Lever & Pull',
+    monthlyScore: 9628,
+    totalXp: 9628,
+    monthlySessions: 9,
+    totalSessions: 9,
     verified: true
   },
   {
@@ -41,11 +39,10 @@ export const leaderboardAthletes: AthleteRankItem[] = [
     rankTotal: 2,
     title: 'Atleta Comunidad',
     level: 'Nivel 2 • Activo',
-    monthlyScore: 115,
-    totalXp: 115,
-    monthlySessions: 2,
-    totalSessions: 2,
-    specialty: 'Core & Resistencia',
+    monthlyScore: 94,
+    totalXp: 94,
+    monthlySessions: 1,
+    totalSessions: 1,
     verified: true
   },
   {
@@ -61,7 +58,6 @@ export const leaderboardAthletes: AthleteRankItem[] = [
     totalXp: 0,
     monthlySessions: 0,
     totalSessions: 0,
-    specialty: 'Push & Fondos',
     verified: true
   },
   {
@@ -77,7 +73,6 @@ export const leaderboardAthletes: AthleteRankItem[] = [
     totalXp: 0,
     monthlySessions: 0,
     totalSessions: 0,
-    specialty: 'Básicos & Dominadas',
     verified: true
   },
   {
@@ -93,7 +88,6 @@ export const leaderboardAthletes: AthleteRankItem[] = [
     totalXp: 0,
     monthlySessions: 0,
     totalSessions: 0,
-    specialty: 'Handstand & Hombros',
     verified: true
   }
 ];
