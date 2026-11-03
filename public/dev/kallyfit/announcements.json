@@ -1,7 +1,7 @@
 [
   {
     "id": "welcome-kallyfit-playstore",
-    "title": "¡Bienvenidos a KallyFit en Play Store! 🚀",
+    "title": "¡Bienvenidos a KallyFit en Play Store!",
     "message": "Te damos la bienvenida a la versión oficial de KallyFit. Registra tus entrenamientos de calistenia, sube de nivel y compite en el ranking global con atletas de todo el mundo. ¡A darlo todo!",
     "tag": "Novedad",
     "date": "2026-11-01",
@@ -9,7 +9,7 @@
   },
   {
     "id": "cloud-backup-enabled",
-    "title": "Respaldo en la Nube Activado ☁️",
+    "title": "Respaldo en la Nube Activado",
     "message": "Al iniciar sesión con tu cuenta de correo o Google, tu historial y rutinas se respaldan automáticamente para que nunca pierdas tu progreso si cambias de dispositivo.",
     "tag": "Actualización",
     "date": "2026-11-01"

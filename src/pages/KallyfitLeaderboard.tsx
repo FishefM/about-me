@@ -11,7 +11,7 @@ import {
   FiX,
   FiRefreshCw
 } from 'react-icons/fi';
-import kallyfitIcon from '../assets/kallyfit-icon.png';
+import kallyfitLetras from '../assets/kallyfit-letras.png';
 import { leaderboardAthletes, type AthleteRankItem } from '../data/kallyfitLeaderboard';
 
 const WORKER_API = import.meta.env.VITE_KALLYFIT_API_URL || 'https://kallyfit.yucefhernandez.com';
@@ -119,22 +119,23 @@ const KallyfitLeaderboard: React.FC = () => {
               className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#8b949e] hover:text-[#58a6ff] transition-colors"
             >
               <FiArrowLeft />
-              <span>Volver a Kallyfit</span>
+              <span>Volver</span>
             </Link>
             <span className="text-[#30363d]">|</span>
-            <div className="flex items-center gap-2">
-              <img src={kallyfitIcon} alt="Kallyfit Logo" className="w-7 h-7 rounded-lg shadow border border-[#30363d]" />
-              <span className="font-black text-sm tracking-wider bg-gradient-to-r from-[#58a6ff] to-[#79c0ff] bg-clip-text text-transparent">
+            <Link to="/dev/kallyfit" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+              <img src={kallyfitLetras} alt="Kallyfit" className="h-7 sm:h-8 w-auto object-contain" />
+              <span className="text-[#30363d]">|</span>
+              <span className="font-bold text-xs sm:text-sm tracking-wider text-[#58a6ff]">
                 LEADERBOARD
               </span>
-            </div>
+            </Link>
           </div>
 
           <div className="flex items-center gap-3">
             {isLiveSync ? (
               <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border border-[#238636]/60 bg-[#238636]/15 text-[#3fb950] font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse"></span>
-                Cloudflare Edge Live
+                En Vivo en la Nube
               </span>
             ) : (
               <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border border-[#30363d] bg-[#161b22] text-[#8b949e]">
@@ -221,7 +222,7 @@ const KallyfitLeaderboard: React.FC = () => {
             <button
               onClick={() => fetchLiveRankings(rankingType)}
               disabled={isLoading}
-              title="Refrescar datos en vivo desde Cloudflare Edge"
+              title="Refrescar datos en vivo desde la nube"
               className="p-2.5 rounded-xl bg-[#0d1117] hover:bg-[#21262d] border border-[#30363d] text-[#58a6ff] hover:text-white transition-colors cursor-pointer disabled:opacity-50"
             >
               <FiRefreshCw className={`text-sm ${isLoading ? 'animate-spin' : ''}`} />

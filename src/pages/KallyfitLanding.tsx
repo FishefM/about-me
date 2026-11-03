@@ -19,6 +19,7 @@ import {
   FiExternalLink
 } from 'react-icons/fi';
 import kallyfitIcon from '../assets/kallyfit-icon.png';
+import kallyfitLetras from '../assets/kallyfit-letras.png';
 import BiomechanicFigure from '../components/BiomechanicFigure';
 
 const WORKER_API = import.meta.env.VITE_KALLYFIT_API_URL || 'https://kallyfit.yucefhernandez.com';
@@ -53,7 +54,7 @@ const KallyfitLanding: React.FC = () => {
         throw new Error('Estructura de datos inválida del servidor');
       }
     } catch (err: any) {
-      setLeaderboardError('No se pudo conectar con el Worker en tiempo real: ' + err.message);
+      setLeaderboardError('No se pudo conectar con el servidor en la nube: ' + err.message);
     } finally {
       setIsLoadingLeaderboard(false);
     }
@@ -146,12 +147,9 @@ const KallyfitLanding: React.FC = () => {
       <header className="sticky top-0 z-50 bg-[#0d1117]/95 backdrop-blur-md border-b border-[#30363d]/80 px-4 sm:px-8 py-3.5">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-5">
-            <div className="flex items-center gap-2.5">
-              <img src={kallyfitIcon} alt="Kallyfit Logo" className="w-8 h-8 rounded-xl shadow border border-[#30363d]" />
-              <span className="font-black text-base sm:text-lg tracking-wider bg-gradient-to-r from-[#58a6ff] to-[#79c0ff] bg-clip-text text-transparent">
-                KALLYFIT
-              </span>
-            </div>
+            <Link to="/dev/kallyfit" className="flex items-center hover:opacity-90 transition-opacity">
+              <img src={kallyfitLetras} alt="Kallyfit" className="h-8 sm:h-9 w-auto object-contain" />
+            </Link>
 
             <nav className="hidden md:flex items-center gap-5 text-xs font-semibold text-[#8b949e]">
               <a href="#caracteristicas" className="hover:text-white transition-colors">Características</a>
@@ -550,7 +548,7 @@ const KallyfitLanding: React.FC = () => {
         {/* FINAL CONVERSION BANNER */}
         <section className="text-center p-10 sm:p-16 rounded-[2.5rem] bg-gradient-to-br from-[#1f6feb]/20 via-[#161b22] to-[#238636]/20 border-2 border-[#58a6ff]/40 space-y-6 relative overflow-hidden">
           <div className="relative z-10 space-y-4 max-w-2xl mx-auto">
-            <img src={kallyfitIcon} alt="Kallyfit" className="w-16 h-16 rounded-2xl mx-auto shadow-xl border-2 border-[#58a6ff]" />
+            <img src={kallyfitLetras} alt="Kallyfit" className="h-12 sm:h-14 w-auto mx-auto object-contain" />
             <h3 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
               Lleva tu físico al siguiente nivel hoy.
             </h3>
@@ -603,11 +601,11 @@ const KallyfitLanding: React.FC = () => {
                     <h3 className="text-base sm:text-lg font-bold text-white">Leaderboard Oficial de Atletas</h3>
                     <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#238636]/20 border border-[#238636]/60 text-[#3fb950]">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse"></span>
-                      Cloudflare Edge Live
+                      En Vivo en la Nube
                     </span>
                   </div>
                   <p className="text-xs text-[#8b949e]">
-                    Datos sincronizados en tiempo real desde el Worker • {lastUpdated ? `Última sincronización: ${lastUpdated}` : 'Consultando...'}
+                    Datos sincronizados en tiempo real en la nube • {lastUpdated ? `Última sincronización: ${lastUpdated}` : 'Consultando...'}
                   </p>
                 </div>
               </div>
@@ -659,7 +657,7 @@ const KallyfitLanding: React.FC = () => {
               {isLoadingLeaderboard ? (
                 <div className="py-16 text-center space-y-3">
                   <div className="w-8 h-8 mx-auto border-4 border-[#58a6ff] border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-xs text-[#8b949e]">Consultando atletas en vivo en Cloudflare Edge (D1)...</p>
+                  <p className="text-xs text-[#8b949e]">Consultando atletas en vivo en la nube...</p>
                 </div>
               ) : leaderboardError ? (
                 <div className="py-12 text-center space-y-3 p-4 rounded-2xl bg-red-950/20 border border-red-800/40">
