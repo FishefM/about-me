@@ -1,0 +1,64 @@
+[
+  {
+    "id": "toki-desafio-barras-oficial",
+    "name": "Desafío de Barras TokiGym Oficial",
+    "description": "Protocolo de bienvenida de la comunidad TokiGym: fondos pesados, dominadas pronas y muscle-ups dinámicos en barra alta.",
+    "goal": "fuerza",
+    "format": "Series",
+    "category": "Comunidad TokiGym",
+    "author": "Yucef Hernández (About Me)",
+    "exercises": [
+      { "exerciseId": "muscle-up-barra", "sets": 4, "reps": "4", "rest": "90s" },
+      { "exerciseId": "dominadas-pronas", "sets": 4, "reps": "8", "rest": "90s" },
+      { "exerciseId": "fondos-paralelas", "sets": 4, "reps": "10", "rest": "75s" },
+      { "exerciseId": "flexiones-diamante", "sets": 4, "reps": "12", "rest": "60s" },
+      { "exerciseId": "dead-hang", "sets": 3, "reps": "45s", "rest": "60s" }
+    ]
+  },
+  {
+    "id": "street-workout-battle-sets-reps",
+    "name": "Street Workout Battle: Sets & Reps Cup",
+    "description": "Rutina competitiva de velocidad y potencia diseñada para clasificaciones de resistencia en barras.",
+    "goal": "resistencia",
+    "format": "Circuito",
+    "category": "Competencias Online",
+    "author": "KallyFit Community",
+    "exercises": [
+      { "exerciseId": "bar-dips", "sets": 4, "reps": "10", "rest": "Inmediato" },
+      { "exerciseId": "dominadas-supinas", "sets": 4, "reps": "8", "rest": "Inmediato" },
+      { "exerciseId": "flexiones-estandar", "sets": 4, "reps": "15", "rest": "Inmediato" },
+      { "exerciseId": "toes-to-bar", "sets": 4, "reps": "10", "rest": "Inmediato" },
+      { "exerciseId": "sentadillas-explosivas", "sets": 4, "reps": "15", "rest": "90s al final" }
+    ]
+  },
+  {
+    "id": "iron-grip-tubos-toki",
+    "name": "Iron Grip: Recorrido Completo en Tubos",
+    "description": "Entrenamiento técnico en los tubos del parque para desarrollar antebrazos de titanio y fuerza de tracción.",
+    "goal": "skills",
+    "format": "Series",
+    "category": "TokiBarras",
+    "author": "Yucef Hernández (About Me)",
+    "exercises": [
+      { "exerciseId": "tubo-recto", "sets": 4, "reps": "2 tubos", "tuboCount": 2, "rest": "90s" },
+      { "exerciseId": "tubo-inclinado", "sets": 4, "reps": "1 tubo", "tuboCount": 1, "rest": "90s" },
+      { "exerciseId": "tubo-chimuela", "sets": 3, "reps": "1 tubo", "tuboCount": 1, "rest": "120s" },
+      { "exerciseId": "dead-hang", "sets": 4, "reps": "40s", "rest": "60s" }
+    ]
+  },
+  {
+    "id": "freestyle-flow-transiciones",
+    "name": "Freestyle Flow: Transiciones Dinámicas",
+    "description": "Secuencia de fluidez en barra y paralelas combinando balanceos, fondos en barra recta y giros controlados.",
+    "goal": "skills",
+    "format": "Series",
+    "category": "Freestyle",
+    "author": "TokiGym Crew",
+    "exercises": [
+      { "exerciseId": "muscle-up-barra", "sets": 4, "reps": "3", "rest": "120s" },
+      { "exerciseId": "bar-dips", "sets": 4, "reps": "8", "rest": "90s" },
+      { "exerciseId": "dominadas-arquero", "sets": 4, "reps": "5", "rest": "90s" },
+      { "exerciseId": "l-sit", "sets": 4, "reps": "15s", "rest": "60s" }
+    ]
+  }
+]
