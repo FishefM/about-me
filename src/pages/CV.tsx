@@ -62,7 +62,7 @@ const CV: React.FC = () => {
 
             <div className="flex flex-wrap gap-4 pt-2 justify-center md:justify-start">
               <div className="flex items-center gap-4 text-zinc-500 dark:text-zinc-400">
-                <a href="mailto:yucefhernandez@hotmail.com" className="hover:text-violet-600 transition-colors"><FiMail size={24} /></a>
+                <a href="mailto:contacto@yucefhernandez.com" className="hover:text-violet-600 transition-colors"><FiMail size={24} /></a>
                 <a href="tel:5584516139" className="hover:text-violet-600 transition-colors"><FiPhone size={24} /></a>
               </div>
             </div>
@@ -79,7 +79,7 @@ const CV: React.FC = () => {
               <ul className="space-y-4 text-sm font-medium">
                 <li className="flex flex-col gap-1">
                   <span className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-tighter">Email</span>
-                  <span className="break-all">yucefhernandez@hotmail.com</span>
+                  <span className="break-all">contacto@yucefhernandez.com</span>
                 </li>
                 <li className="flex flex-col gap-1">
                   <span className="text-zinc-400 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-tighter">Teléfono</span>

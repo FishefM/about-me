@@ -16,7 +16,7 @@ const Contact: React.FC = () => (
 
       <div className="pt-6 sm:pt-12 flex flex-col items-center gap-8 w-full">
         <a
-          href="mailto:yucefhernandez@hotmail.com"
+          href="mailto:contacto@yucefhernandez.com"
           className="group relative w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-violet-600 text-white font-black rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-violet-500/40 text-center"
         >
           <span className="relative z-10 text-lg sm:text-xl inline-flex items-center gap-2">

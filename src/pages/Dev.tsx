@@ -346,7 +346,7 @@ const Dev: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <a
-            href="mailto:yucefhernandez@hotmail.com"
+            href="mailto:contacto@yucefhernandez.com"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-700 transition-all shadow-lg shadow-violet-500/20 text-center text-sm"
           >
             <FiMail className="text-base" />
