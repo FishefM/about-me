@@ -6,6 +6,7 @@ import Notes from './pages/Notes';
 import Dev from './pages/Dev';
 import KallyfitLanding from './pages/KallyfitLanding';
 import KallyfitLeaderboard from './pages/KallyfitLeaderboard';
+import KallyfitPrivacy from './pages/KallyfitPrivacy';
 import './App.css';
 
 function App() {
@@ -19,6 +20,10 @@ function App() {
           <Route path="dev" element={<Dev />} />
           <Route path="dev/kallyfit" element={<KallyfitLanding />} />
           <Route path="dev/kallyfit/leaderboard" element={<KallyfitLeaderboard />} />
+          <Route path="dev/kallyfit/privacy" element={<KallyfitPrivacy />} />
+          <Route path="dev/kallyfit/privacidad" element={<KallyfitPrivacy />} />
+          <Route path="privacy" element={<KallyfitPrivacy />} />
+          <Route path="privacidad" element={<KallyfitPrivacy />} />
           {/* Aquí puedes añadir rutas para otras páginas independientes en el futuro */}
         </Route>
       </Routes>

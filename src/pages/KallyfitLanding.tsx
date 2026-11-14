@@ -582,9 +582,11 @@ const KallyfitLanding: React.FC = () => {
         {/* Dedicated Minimal Landing Footer */}
         <footer className="pt-8 border-t border-[#30363d] text-center text-xs text-[#8b949e] space-y-2">
           <p>© {new Date().getFullYear()} Kallyfit • Creado con pasión por el entrenamiento físico</p>
-          <p className="text-[11px] text-[#6e7681]">
-            Desarrollado por <Link to="/" className="text-[#58a6ff] hover:underline">Yucef</Link>
-          </p>
+          <div className="flex items-center justify-center gap-4 text-[11px] text-[#6e7681]">
+            <span>Desarrollado por <Link to="/" className="text-[#58a6ff] hover:underline">Yucef</Link></span>
+            <span>•</span>
+            <Link to="/dev/kallyfit/privacy" className="text-[#58a6ff] hover:underline">Política de Privacidad & Eliminación de Datos</Link>
+          </div>
         </footer>
       </div>
 
